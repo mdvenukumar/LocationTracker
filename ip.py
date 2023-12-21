@@ -5,26 +5,32 @@ def get_location():
     try:
         # Get location based on IP address (less accurate)
         location_ip = geocoder.ip('me')
-        st.write("Location based on IP address:")
-        st.write("Latitude:", location_ip.latlng[0])
-        st.write("Longitude:", location_ip.latlng[1])
+        return location_ip
 
-        # Get location based on more accurate methods (requires internet connection)
-        location_accurate = geocoder.ip('me', method='reverse')
-        st.write("\nAccurate Location:")
-        st.write("Latitude:", location_accurate.latlng[0])
-        st.write("Longitude:", location_accurate.latlng[1])
-
-        # Display map with the accurate location
-        st.map([(location_accurate.latlng[0], location_accurate.latlng[1])])
-
+    except geocoder.GeocoderTimedOut as timeout_error:
+        st.error(f"Timeout error occurred: {timeout_error}")
+    except geocoder.GeocoderServiceError as service_error:
+        st.error(f"Geocoder service error occurred: {service_error}")
     except Exception as e:
-        st.write("An error occurred:", str(e))
+        st.error(f"An error occurred: {e}")
+    return None
+
+def print_location(location, label):
+    if location is not None and location.latlng:
+        st.write(f"\n{label} Location:")
+        st.write(f"Latitude: {location.latlng[0]}")
+        st.write(f"Longitude: {location.latlng[1]}")
+    else:
+        st.warning(f"Failed to retrieve {label.lower()} location.")
+
+def main():
+    st.title("Location Information App")
+
+    # Button to trigger location retrieval
+    if st.button("Get Location"):
+        # Get location when the button is clicked
+        location_ip = get_location()
+        print_location(location_ip, "IP")
 
 if __name__ == "__main__":
-    st.title("Location App")
-
-    # Create a button to trigger the execution of get_location
-    if st.button("Get Location"):
-        get_location()
-
+    main()
