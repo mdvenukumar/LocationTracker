@@ -1,36 +1,27 @@
-import streamlit as st
 import geocoder
+import streamlit as st
 
 def get_location():
     try:
         # Get location based on IP address (less accurate)
         location_ip = geocoder.ip('me')
-        return location_ip
-
-    except geocoder.GeocoderTimedOut as timeout_error:
-        st.error(f"Timeout error occurred: {timeout_error}")
-    except geocoder.GeocoderServiceError as service_error:
-        st.error(f"Geocoder service error occurred: {service_error}")
+        return location_ip.latlng
     except Exception as e:
-        st.error(f"An error occurred: {e}")
-    return None
-
-def print_location(location, label):
-    if location is not None and location.latlng:
-        st.write(f"\n{label} Location:")
-        st.write(f"Latitude: {location.latlng[0]}")
-        st.write(f"Longitude: {location.latlng[1]}")
-    else:
-        st.warning(f"Failed to retrieve {label.lower()} location.")
+        st.error(f"An error occurred: {str(e)}")
+        return None
 
 def main():
-    st.title("Location Information App")
-
+    st.title("Location Coordinates App")
+    
     # Button to trigger location retrieval
     if st.button("Get Location"):
-        # Get location when the button is clicked
-        location_ip = get_location()
-        print_location(location_ip, "IP")
+        coordinates = get_location()
+        
+        # Display coordinates if available
+        if coordinates:
+            st.success("Coordinates Retrieved:")
+            st.write(f"Latitude: {coordinates[0]}")
+            st.write(f"Longitude: {coordinates[1]}")
 
 if __name__ == "__main__":
     main()
