@@ -1,25 +1,30 @@
 import streamlit as st
 import geocoder
-import pandas as pd
 
 def get_location():
-    location = geocoder.ip('me')
-    return location.latlng
+    try:
+        # Get location based on IP address (less accurate)
+        location_ip = geocoder.ip('me')
+        st.write("Location based on IP address:")
+        st.write("Latitude:", location_ip.latlng[0])
+        st.write("Longitude:", location_ip.latlng[1])
 
-def main():
-    st.title("Location Tracer App")
+        # Get location based on more accurate methods (requires internet connection)
+        location_accurate = geocoder.ip('me', method='reverse')
+        st.write("\nAccurate Location:")
+        st.write("Latitude:", location_accurate.latlng[0])
+        st.write("Longitude:", location_accurate.latlng[1])
 
-    if st.button("Trace Location"):
-        location = get_location()
-        if location:
-            data = {'latitude': [location[0]], 'longitude': [location[1]]}
-            df = pd.DataFrame(data)
-            st.write("Location Information:")
-            st.write(f"- Latitude: {location[0]}")
-            st.write(f"- Longitude: {location[1]}")
-            st.map(df, zoom=12)
-        else:
-            st.warning("Unable to retrieve location. Please try again.")
+        # Display map with the accurate location
+        st.map([(location_accurate.latlng[0], location_accurate.latlng[1])])
+
+    except Exception as e:
+        st.write("An error occurred:", str(e))
 
 if __name__ == "__main__":
-    main()
+    st.title("Location App")
+
+    # Create a button to trigger the execution of get_location
+    if st.button("Get Location"):
+        get_location()
+
